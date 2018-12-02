@@ -10,8 +10,6 @@ public class Crime {
     private String mTitle;
     private Date mDate;
     private boolean mSolved;
-
-
     private boolean mRequiresPolice;
 
     Crime() {
