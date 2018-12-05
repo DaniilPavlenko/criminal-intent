@@ -21,13 +21,13 @@ class CrimeLab {
 
     private CrimeLab() {
         mCrimes = new LinkedHashMap<>();
-//        for (int i = 0; i < 100; i++) {
-//            Crime crime = new Crime();
-//            crime.setTitle("Crime #" + i);
-//            crime.setSolved(i % 2 == 0);
-//            crime.setRequiresPolice(i % 5 == 0);
-//            mCrimes.put(crime.getId(), crime);
-//        }
+        for (int i = 0; i < 2; i++) {
+            Crime crime = new Crime();
+            crime.setTitle("Crime #" + i);
+            crime.setSolved(i % 2 == 0);
+            crime.setRequiresPolice(i % 5 == 0);
+            mCrimes.put(crime.getId(), crime);
+        }
     }
 
     List<Crime> getCrimes() {
@@ -40,5 +40,9 @@ class CrimeLab {
 
     public void addCrime(Crime crime) {
         mCrimes.put(crime.getId(), crime);
+    }
+
+    public void removeCrime(Crime crime) {
+        mCrimes.remove(crime.getId());
     }
 }
