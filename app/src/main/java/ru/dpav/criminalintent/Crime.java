@@ -12,8 +12,12 @@ public class Crime {
     private boolean mSolved;
     private boolean mRequiresPolice;
 
-    Crime() {
-        mId = UUID.randomUUID();
+    public Crime() {
+        this(UUID.randomUUID());
+    }
+
+    public Crime(UUID uuid) {
+        mId = uuid;
         mDate = new Date();
     }
 
@@ -33,7 +37,7 @@ public class Crime {
         return mDate;
     }
 
-    String getDateByFormat(String format){
+    public String getDateByFormat(String format) {
         return String.valueOf(DateFormat.format(format, mDate));
     }
 
@@ -41,19 +45,19 @@ public class Crime {
         mDate = date;
     }
 
-    boolean isSolved() {
+    public boolean isSolved() {
         return mSolved;
     }
 
-    void setSolved(boolean solved) {
+    public void setSolved(boolean solved) {
         mSolved = solved;
     }
 
-    boolean isRequiresPolice() {
+    public boolean isRequiresPolice() {
         return mRequiresPolice;
     }
 
-    void setRequiresPolice(boolean requiresPolice) {
+    public void setRequiresPolice(boolean requiresPolice) {
         mRequiresPolice = requiresPolice;
     }
 }

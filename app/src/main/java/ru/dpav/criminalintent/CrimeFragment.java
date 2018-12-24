@@ -9,14 +9,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageButton;
 
 import java.util.Date;
 import java.util.UUID;
@@ -31,8 +34,8 @@ public class CrimeFragment extends Fragment {
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton, mTimeButton;
-    private ImageButton mDeleteButton;
     private CheckBox mSolvedCheckBox, mRequiresPolice;
+    private String mHashCrime;
 
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -45,8 +48,10 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        mHashCrime = getHashForCrime(mCrime);
     }
 
     @Nullable
@@ -113,15 +118,24 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        mDeleteButton = v.findViewById(R.id.crime_delete);
-        mDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CrimeLab.get(getActivity()).removeCrime(mCrime);
-                getActivity().finish();
-            }
-        });
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.delete_crime:
+                CrimeLab.get(getActivity()).deleteCrime(mCrime);
+                getActivity().finish();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -147,5 +161,28 @@ public class CrimeFragment extends Fragment {
 
     private void updateTime() {
         mTimeButton.setText(mCrime.getDateByFormat("H:mm"));
+    }
+
+    private byte[] toByteArray(Object obj) {
+        return obj.toString().getBytes();
+    }
+
+
+    private String getHashForCrime(Crime crime) {
+        String allData = crime.getId()
+                + crime.getTitle()
+                + crime.getDate()
+                + crime.isSolved()
+                + crime.isRequiresPolice();
+
+        return Base64.encodeToString(toByteArray(allData), Base64.DEFAULT);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (!mHashCrime.equals(getHashForCrime(mCrime))) {
+            CrimeLab.get(getActivity()).updateCrime(mCrime);
+        }
     }
 }

@@ -13,8 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +48,7 @@ public class CrimePagerActivity extends AppCompatActivity {
                 mViewPager.setCurrentItem(0);
             }
         });
+
         mLastCrimeButton = findViewById(R.id.last_crime_button);
         mLastCrimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,7 +57,7 @@ public class CrimePagerActivity extends AppCompatActivity {
             }
         });
 
-        mCrimes = CrimeLab.get(this).getCrimes();
+        mCrimes = new ArrayList<>(CrimeLab.get(this).getCrimes().values());
         FragmentManager fm = getSupportFragmentManager();
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fm) {
             private int mCurrentFragmentPosition = -1;

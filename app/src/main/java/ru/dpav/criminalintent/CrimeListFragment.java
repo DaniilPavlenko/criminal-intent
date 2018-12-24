@@ -22,7 +22,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class CrimeListFragment extends Fragment {
 
@@ -49,7 +52,7 @@ public class CrimeListFragment extends Fragment {
         mCrimeRecyclerView = view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
         }
 
@@ -109,8 +112,8 @@ public class CrimeListFragment extends Fragment {
 
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
-        List<Crime> crimes = crimeLab.getCrimes();
-        if(crimes.size() == 0) {
+        Map<UUID, Crime> crimes = crimeLab.getCrimes();
+        if (crimes == null || crimes.size() == 0) {
             mEmptyCrimes.setVisibility(View.VISIBLE);
         } else {
             mEmptyCrimes.setVisibility(View.GONE);
@@ -122,8 +125,8 @@ public class CrimeListFragment extends Fragment {
 //            if (mAdapterPosition >= 0) {
 //                mAdapter.notifyItemChanged(mAdapterPosition);
 //            } else {
-                mAdapter.setNewData(crimes);
-                mAdapter.notifyDataSetChanged();
+            mAdapter.setCrimes(crimes);
+            mAdapter.notifyDataSetChanged();
 //            }
         }
         updateSubtitle();
@@ -140,7 +143,7 @@ public class CrimeListFragment extends Fragment {
         int crimeCount = crimeLab.getCrimes().size();
         String subtitle = getResources().getQuantityString(R.plurals.crimes_plurals, crimeCount, crimeCount);
 
-        if(!mSubtitleVisible){
+        if (!mSubtitleVisible) {
             subtitle = null;
         }
 
@@ -193,12 +196,9 @@ public class CrimeListFragment extends Fragment {
 
         private List<Crime> mCrimes;
 
-        public CrimeAdapter(List<Crime> crimes) {
-            mCrimes = crimes;
-        }
-
-        public void setNewData(List<Crime> crimes) {
-            mCrimes = crimes;
+        public CrimeAdapter(Map<UUID, Crime> crimes) {
+            mCrimes = new ArrayList<>();
+            mCrimes.addAll(crimes.values());
         }
 
         @NonNull
@@ -228,6 +228,11 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        public void setCrimes(Map<UUID, Crime> crimes) {
+            mCrimes = new ArrayList<>();
+            mCrimes.addAll(crimes.values());
         }
 
         @Override
