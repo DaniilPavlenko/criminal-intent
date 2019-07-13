@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import java.util.Date;
 import java.util.UUID;
@@ -41,6 +42,7 @@ public class CrimeFragment extends Fragment {
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton, mTimeButton, mReportButton, mSuspectButton;
+    private ImageButton mCallSuspect;
     private CheckBox mSolvedCheckBox, mRequiresPolice;
     private String mHashCrime;
 
@@ -137,7 +139,7 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
         mSuspectButton = v.findViewById(R.id.crime_suspect);
         mSuspectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,8 +148,27 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mCallSuspect = v.findViewById(R.id.crime_call_suspect);
+        if (mCrime.getSuspect() == null) {
+            mCallSuspect.setVisibility(View.GONE);
+        }
+        mCallSuspect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String phone = mCrime.getSuspectPhoneNumber();
+
+                if (phone == null) {
+                    return;
+                }
+
+                Uri callUri = Uri.parse("tel:" + phone);
+                Intent intent = new Intent(Intent.ACTION_DIAL, callUri);
+                startActivity(intent);
+            }
+        });
+
         if (mCrime.getSuspect() != null) {
-            mSuspectButton.setText(mCrime.getSuspect());
+            mSuspectButton.setText(mCrime.getSuspectName());
         }
 
         PackageManager packageManager = getActivity().getPackageManager();
@@ -193,7 +214,10 @@ public class CrimeFragment extends Fragment {
         } else if (requestCode == REQUEST_CONTACT && data != null) {
             Uri contactUri = data.getData();
 
-            String[] queryFields = new String[]{ContactsContract.Profile.DISPLAY_NAME};
+            String[] queryFields = new String[]{
+                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+            };
 
             Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
 
@@ -203,9 +227,16 @@ public class CrimeFragment extends Fragment {
                 }
 
                 c.moveToFirst();
-                String suspect = c.getString(0);
+
+                int phoneIndex = c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                int nameIndex = c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+
+                String suspect = c.getString(nameIndex);
+                String phone = c.getString(phoneIndex);
+                suspect += " tel:" + phone;
                 mCrime.setSuspect(suspect);
-                mSuspectButton.setText(suspect);
+                mSuspectButton.setText(mCrime.getSuspectName());
+                mCallSuspect.setEnabled(true);
             } finally {
                 c.close();
             }
@@ -223,7 +254,6 @@ public class CrimeFragment extends Fragment {
     private byte[] toByteArray(Object obj) {
         return obj.toString().getBytes();
     }
-
 
     private String getHashForCrime(Crime crime) {
         String allData = crime.getId()

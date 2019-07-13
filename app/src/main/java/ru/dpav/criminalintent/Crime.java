@@ -69,4 +69,18 @@ public class Crime {
     public void setSuspect(String suspect) {
         mSuspect = suspect;
     }
+
+    public String getSuspectName() {
+        if (mSuspect != null && mSuspect.contains(" tel:")) {
+            return mSuspect.split(" tel:")[0];
+        }
+        return mSuspect;
+    }
+
+    public String getSuspectPhoneNumber() {
+        if (mSuspect != null && mSuspect.contains(" tel:")) {
+            return mSuspect.split("tel:")[1];
+        }
+        return null;
+    }
 }
